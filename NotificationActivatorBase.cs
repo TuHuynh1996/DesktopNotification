@@ -24,11 +24,16 @@ namespace DesktopToast
 		/// <param name="count">The number of data elements</param>
 		public void Activate(string appUserModelId, string invokedArgs, NOTIFICATION_USER_INPUT_DATA[] data, uint count)
 		{
-			_action?.Invoke(invokedArgs, data?.Take((int)count).ToDictionary(x => x.Key, x => x.Value));
+			ToastClickEventArgs invokedArgsHelper = new ToastClickEventArgs
+			{
+				UserModelId = appUserModelId,
+				Action = invokedArgs
+			};
+			_action?.Invoke(invokedArgsHelper, data?.Take((int)count).ToDictionary(x => x.Key, x => x.Value));
 		}
 
 		private static int? _cookie;
-		private static Action<string, Dictionary<string, string>> _action;
+		private static Action<ToastClickEventArgs, Dictionary<string, string>> _action;
 
 		/// <summary>
 		/// Register COM class type.
@@ -36,7 +41,7 @@ namespace DesktopToast
 		/// <param name="activatorType">Notification activator type</param>
 		/// <param name="action">Action to be invoked when Activate callback method is called</param>
 		/// <remarks>Notification activator must inherit from this class.</remarks>
-		public static void RegisterComType(Type activatorType, Action<string, Dictionary<string, string>> action)
+		public static void RegisterComType(Type activatorType, Action<ToastClickEventArgs, Dictionary<string, string>> action)
 		{
 			NotificationHelper.CheckArgument(activatorType);
 
